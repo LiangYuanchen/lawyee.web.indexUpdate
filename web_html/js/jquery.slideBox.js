@@ -9,6 +9,55 @@
  * Demo: http://ishere.cn/demo/jquery.slidebox/
  */
 (function($) {
+	$.fn.fadeInOut = function(options){
+		//默认参数
+		var defaults = {
+			direction : 'left',//left,top
+			duration : 0.6,//unit:seconds
+			easing : 'swing',//swing,linear
+			delay : 3,//unit:seconds
+			startIndex : 0,
+			clickBarRadius : 5,//unit:px
+		};		
+		var setting = $.extend(defaults, options || {});
+		var wrappers = $(this),divs = wrappers.find(".io");
+		
+		var init = function(){
+				divs.each(function(index, element) {
+					if(index!=0)
+                    $(this).hide();
+					else
+					$(this).addClass("actived");
+                });
+				divs.size()>1 && start();
+			}
+			
+		var start = function(){
+				stop();
+				$(".io.actived").fadeIn(setting.duration*1000);
+ 				$next = $(".io.actived").next();
+				if($next==null)
+					$next = $(".io").first();
+				$(".io.actived").removeClass("actived");
+				$next.addClass("actived");
+				$next.fadeOut(setting.duration*1000);
+				
+				wrappers.data('timeids', window.setTimeout(start, setting.delay*1000));
+			}
+			
+		//停止轮播
+		var stop = function() {
+			window.clearTimeout(wrappers.data('timeids'));
+		};
+		
+		//鼠标经过事件
+		wrappers.hover(function(){
+			stop();
+		}, function(){
+			start();
+		});
+		init();
+		}
 	$.fn.slideBox = function(options) {
 		//默认参数
 		var defaults = {
@@ -91,6 +140,25 @@
 			wrapper.find('.nums').find('a:eq('+index+')').addClass('active').siblings().removeClass('active');
 			wrapper.find('.title').find('a').attr('href', active_a.attr('href')).text(active_a.attr('title'));
 
+			lis.find(".active").fadeIn(settings.duration*1000, settings.easing, function() {
+				active.removeClass('active');
+				if(order_by=='ASC'){
+					if (active.next().size()){
+						active.next().addClass('active');
+					}else{
+						order_by = 'DESC';
+						active.prev().addClass('active');
+					}
+				}else if(order_by=='DESC'){
+					if (active.prev().size()){
+						active.prev().addClass('active');
+					}else{
+						order_by = 'ASC';
+						active.next().addClass('active');
+					}
+				}
+			});
+			lis.find(".active").fadeOut(settings.duration*1000, settings.easing);
 			ul.stop().animate(param, settings.duration*1000, settings.easing, function() {
 				active.removeClass('active');
 				if(order_by=='ASC'){
